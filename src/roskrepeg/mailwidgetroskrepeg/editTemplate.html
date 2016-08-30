@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<head>
+    <style type="text/css" media="screen">
+        .editTemplateModal__row{
+            margin: 10px 0;
+        }
+        
+        .editTemplateModal__textarea{
+            border: 1px black solid;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            resize: none;
+            paddding: 5px 5px 5px 5px;
+            overflow: scroll;
+        }
+        .editTemplateModal__row._header{
+            font-size: 20px;
+        }
+        
+        .editTemplateModal__row._balance{
+            font-size: 80%;
+            color: #999;
+        }
+
+        .editTemplateModal__text_sender{
+
+        }
+
+        .editTemplateModal__text{
+            color: black;
+            heigth: 400px;
+            margin: 10px 0;
+        }    
+
+        .textareaclass{
+            overflow: hidden;
+            width: 100%;
+            resize: none;
+        }
+
+
+       .menuTable
+        {
+            float: left;
+            font-family: Arial;
+            font-size: 14px;
+            margin: 10px 10px 10px 10px;
+        }
+        
+        .radius {
+            border-radius: 8px;
+            border: 1px solid black; /* Параметры рамки */
+            padding: 15px; /* Поля вокруг текста */
+            margin-bottom: 10px; /* Отступ снизу */
+        }
+
+        .fileListTable{
+            border: 1px solid black;
+        }
+        
+        .fileListTable>tbody>tr>td{
+            padding: 10px 10px 10px 10px;
+        }
+        
+    </style>
+
+</head>
+
+<body>
+    <form class="editTemplate" action="" enctype="multipart/form-data">
+        <div class="mymodal__row _header">
+            Список шаблонов
+        </div>
+        
+        <div class="editTemplate__row">
+
+            <table class="fileListTable">
+            </table>
+        </div>
+        
+        <div class="editTemplate__row">
+            <div class ="createTemplate">
+                <a href = "#">Создать новый шаблон</a>
+            </div>
+        </div>
+
+        <div class="myoutputdata">
+            <input type="hidden" name="user_login" value="{{user_login}}">
+            <input type="hidden" name="user_hash" value="{{user_hash}}">
+            <input type="hidden" name="subdomain" value="{{subdomain}}">
+            <input type="hidden" name="currentContact" value="{{currentContact}}">
+            <input type="hidden" name="leadName" value="{{contactData['name'][0]}}">
+            <input type="hidden" name="contactStatus" value="{{contactData['Статус клиента'][0]}}">
+            <input type="hidden" name="login" value="{{login}}">
+            <input type="hidden" name="password" value="{{password}}">
+            <input type="hidden" name="workStatus" value="{{contactData['workStatus'][0]}}">
+        </div>
+
+
+    </form>
+
+    <script>
+        var editTmpl = {};
+        
+        function addItem() {
+            maxItem = 10;
+            index = $(".fileArea .file").length
+            if (maxItem != 0 && index >= maxItem) {
+                $('#add').css({
+                    'display': 'none'
+                })
+            } 
+            else 
+            {
+                $('.fileArea').append('\
+                    <div class="container" >\
+                        <label for="filechose">Прикрепить файл:</label>\
+                        <input class="file" type="file" name="filechose[]"/>\
+                        <a href="javascript:\/\/" onclick="deleteItem(this)">х</a>\
+                    </div>\
+                ');
+            }
+        }
+
+        function deleteItem(element) {
+            $(element).parent().remove()
+            if ($('#adder:hidden')) {
+                $('#add').css({
+                    'display': 'inline-block'
+                })
+            }
+        }
+        
+        var editor = function(){
+            var ckeditor1 = CKEDITOR.replace('ckeditorArea');
+            AjexFileManager.init({
+                returnTo: 'ckeditor',
+                editor: ckeditor1            
+            });
+        }
+
+        editTmpl.openModal = function(modalClass, callback) {
+            new Modal ({
+                class_name: 'modal-window2',
+                init: function ($modal_body2) {
+                    $modal_body2
+                            .trigger ('modal:loaded')
+                            .html ('<div class="'+modalClass+'"><div style="text-align: center;"> Идет загрузка..</div></div>')
+                            .trigger('modal:centrify')
+                            .append('<span class="modal-body__close"><span class="icon icon-modal-close"></span></span>');
+                    callback();
+                    editTmpl.centrifyModal=function(){
+                        $modal_body2.trigger('modal:centrify');
+                    }
+               },
+               destroy: function(){}
+            });
+        }
+        
+        editTmpl.loadModalEditTemplate = function(nameTmpl, addressEmail, nameEmail, textTmpl, modalClass, callback) {
+            $('.'+modalClass).load(
+                'https://googledrive.com/host/0ByLnB0fp6SpwR3d5eFBNNlQ1MDA',
+                function(template){
+                    $('#nameTmpl').val(nameTmpl);
+                    $('#addressEmail').val(addressEmail);
+                    $('#nameEmail').val(nameEmail);
+                    $('#ckeditorArea').val(textTmpl);
+                    callback(modalClass);
+                    editTmpl.centrifyModal();
+                }
+            );
+        }
+    
+        editTmpl.submitForm = function(modalClass) {
+            $('.mymodal').on('submit', function(e){
+                var nameTmpl = $('#nameTmpl').val();
+                var pattern = new RegExp(/^[a-zA-Z0-9_]+$/);
+                if (!pattern.test(nameTmpl)){
+                    e.preventDefault();
+                    alert('Название шаблона может содержать только латинские буквы, цифры и знак подчеркивания');
+                }
+                else{
+                    e.preventDefault();
+                    var nameTmpl = $('#nameTmpl').val();
+                    var addressEmail = $('#addressEmail').val();
+                    var nameEmail = $('#nameEmail').val();
+                    var textTmpl = CKEDITOR.instances.ckeditorArea.getData();
+                    $.ajax({
+                        type : 'POST',
+                        url : 'https://fishdayprod.ru/widgets/roskrepeg_version_2/template.php',
+                        data :  {
+                                    nameTmpl : nameTmpl,
+                                    addressEmail: addressEmail,
+                                    nameEmail : nameEmail,
+                                    textTmpl : textTmpl
+                                }
+                    })
+                    .done(function(data){
+                        $('.editTemplateModal2').html(data);
+                        editTmpl.getFilesList();
+                    });
+                }
+            });
+        };
+        
+        editTmpl.filesListDesigner = function()
+        {
+            
+        }
+        
+        editTmpl.createTemplate = function(){
+            $('.createTemplate').on('click', function(e){
+                e.preventDefault();
+                modalClass = 'editTemplateModal2';
+                editTmpl.openModal(modalClass, function(){
+                    editTmpl.loadModalEditTemplate('','','', '', modalClass, function(){
+                        editTmpl.submitForm(modalClass);
+                    });
+                });
+            });
+        }
+        
+        editTmpl.editTemplate = function(nameTmpl){
+            $('.' + nameTmpl + 'edit').on('click', function(e){
+                e.preventDefault();
+                $.ajax({
+                    type : 'POST',
+                    url : 'https://fishdayprod.ru/widgets/roskrepeg_version_2/editTemplate.php',
+                    dataType: 'json',
+                    data :  {
+                                nameTmpl : nameTmpl,
+                            }
+                })
+                .done(function(data){
+                    editTmpl.nameTmpl = (data['nameTmpl'][0]);
+                    editTmpl.addressEmail = (data['addressEmail'][0]);
+                    editTmpl.nameEmail = (data['nameEmail'][0]);
+                    editTmpl.textTmpl = (data['textTmpl'][0]);
+                    modalClass = 'editTemplateModal2';
+                    editTmpl.openModal(modalClass, function(){
+                        editTmpl.loadModalEditTemplate(editTmpl.nameTmpl, editTmpl.addressEmail, editTmpl.nameEmail, editTmpl.textTmpl, modalClass, function(){
+                            editTmpl.submitForm(modalClass);
+                        });
+                    });
+                });
+            });
+        }
+    
+        editTmpl.delTemplate = function(nameTmpl) {
+            $('.' + nameTmpl +'del').on('click', function(e){              
+                e.preventDefault();
+                $('.fileListTable').find('.'+nameTmpl).remove();                
+                $.ajax({
+                    type : 'POST',
+                    url : 'https://fishdayprod.ru/widgets/roskrepeg_version_2/delTemplate.php',
+                    dataType: 'json',
+                    data :  {
+                                nameTmpl : nameTmpl,
+                            }
+                })
+                .done(function(data){
+                });
+            });
+        }
+
+        editTmpl.getFilesList = function(){
+            $.ajax({
+                type : 'POST',
+                dataType: 'json',
+                url : 'https://fishdayprod.ru/widgets/roskrepeg_version_2/filesList.php',
+            })
+            .done(function(data){
+                editTmpl.filesList = data;
+                $('.fileListTable tr').remove();
+                $.each(data, function(i, val) {
+                    var inTable = '<tr class="'+val+'"><td>'+val+
+                        '</td><td><div class="'+val+'edit"><a href = "#">Редактировать шаблон</a></div></td>'+
+                        '<td><div class="'+val+'del"><a href = "#">Удалить шаблон</a></div></td></tr>';
+                    $('.fileListTable').append(inTable);
+                    editTmpl.editTemplate(val);
+                    editTmpl.delTemplate(val);
+                    $('.modal-body').trigger('modal:centrify');
+                });        
+            });
+        }
+
+        
+        $(document).ready(function(){
+            editTmpl.createTemplate();
+            editTmpl.getFilesList();
+        });
+        
+    </script>
+
+</body>

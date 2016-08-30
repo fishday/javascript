@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<head>
+    <style type="text/css" media="screen">
+        .mymodal{
+        }
+        .mymodal__row{
+            margin: 10px 0;
+            
+        }
+        
+        .mymodal__textarea{
+            border: 1px black solid;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            resize: none;
+            paddding: 5px 5px 5px 5px;
+            overflow: scroll;
+        }
+        .mymodal__row._header{
+            font-size: 20px;
+        }
+        
+        .mymodal__row._balance{
+            font-size: 80%;
+            color: #999;
+        }
+
+        .mymodal__text_sender{
+
+        }
+
+        .mymodal__text{
+            color: black;
+            heigth: 400px;
+            margin: 10px 0;
+        }    
+
+        .textareaclass{
+            overflow: hidden;
+            width: 100%;
+            resize: none;
+        }
+    </style>
+
+</head>
+<body>
+    <form class="mymodal" action="" enctype="multipart/form-data">
+        <div class="mymodal__row _header">
+            Отправка письма
+        </div>
+
+        <div class="mymodal__row">
+            <label for=".selectTemplate">Выберите шаблон:</label>
+            <select name="select" class="selectTemplate">
+                <option value="value1" selected> - шаблон не выбран - </option> 
+                {% for qdata in contactData['filesList'] %}
+                    <option value="{{ qdata }}">{{ qdata }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="mymodal__row">
+            Получатель: <input type="text" name="name" id="addressEmail" placeholder="Введите адрес получателя">
+        </div>
+        
+        
+        <div class="mymodal__row">
+            Тема письма:
+            <input type="text" name="title" id="title" value="" placeholder="Введите тему письма">
+        </div>
+
+        <div>
+            Текст письма:
+        </div>   
+
+        <div class="mymodal__text">
+            <textarea class ="mymodal__textarea" name="ckeditorArea" id="ckeditorArea">
+            </textarea>
+        </div>
+
+        <div class="mymodal__row">
+            <div class="fileArea">
+                <p><a href="javascript://" onclick="addItem (this)" id="add">Добавить файл</a></p>
+                <div class ="container">
+                    <label for="filechose">Прикрепить файл:</label>
+                    <input type="file" name="filechose[]" multiple="multiple" class="filechose">
+                    <a href="javascript:\/\/" onclick="deleteItem(this)">х</a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="mymodal__row">
+            <button type="submit" class="button-input button-input_blue">
+                <span class="button-input-inner">
+                    <span class="button-input-inner__text">
+                        Отправить письмо
+                    </span>
+                </span>
+            </button>
+        </div>
+
+        <div class="myoutputdata">
+            <input type="hidden" name="user_login" id="user_login" value="{{user_login}}">
+            <input type="hidden" name="user_hash" id="user_hash" value="{{user_hash}}">
+            <input type="hidden" name="subdomain" id="subdomain" value="{{subdomain}}">
+            <input type="hidden" name="currentContact" id="currentContact" value="{{currentContact}}">
+            <input type="hidden" name="leadName" value="{{contactData['name'][0]}}">
+            <input type="hidden" name="contactStatus" value="{{contactData['Статус клиента'][0]}}">
+            <input type="hidden" name="login" value="{{login}}">
+            <input type="hidden" name="password" value="{{password}}">
+            <input type="hidden" name="workStatus" value="{{contactData['workStatus'][0]}}">
+            <input type="hidden" name="widget_code" id="widget_code" value="{{widget_code}}">
+        </div>
+
+
+    </form>
+
+    <script>
+        function addItem() {
+            maxItem = 10;
+            index = $(".fileArea .file").length
+            if (maxItem != 0 && index >= maxItem) {
+                $('#add').css({
+                    'display': 'none'
+                })
+            } 
+            else 
+            {
+                $('.fileArea').append('\
+                    <div class="container" >\
+                        <label for="filechose">Прикрепить файл:</label>\
+                        <input class="file" type="file" name="filechose[]"/>\
+                        <a href="javascript:\/\/" onclick="deleteItem(this)">х</a>\
+                    </div>\
+                ');
+            }
+        }
+
+        function deleteItem(element) {
+            $(element).parent().remove()
+            if ($('#adder:hidden')) {
+                $('#add').css({
+                    'display': 'inline-block'
+                })
+            }
+        }
+        
+        var changeTemplate = function() {
+            $('.selectTemplate').on('change', function(){
+                $.ajax({
+                    type : 'POST',
+                    url : 'https://fishdayprod.ru/widgets/roskrepeg_version_2/createMail.php',
+                    dataType: 'json',
+                    data :  {
+                                subdomain: $('#subdomain').val(),
+                                user_login: $('#user_login').val(),
+                                user_hash: $('#user_hash').val(),
+                                currentContact: $('#currentContact').val(),
+                                widget_code: $('#widget_code').val(),
+                                nameTmpl : $('.selectTemplate option:selected').text(),
+                            }
+                })
+                .done(function(data){
+                    $('#title').val(data['nameEmail']);
+                    $('#addressEmail').val(data['addressEmail']);
+                    var textEditor = CKEDITOR.instances.ckeditorArea;
+                    textEditor.setData(data['textTmpl']);
+                });
+
+            });
+        }
+        
+        $(document).ready(function(){
+            CKEDITOR.replace('ckeditorArea'); 
+            changeTemplate();
+            //setTimeout(editor, 1000);
+        });
+        
+    </script>
+
+</body>

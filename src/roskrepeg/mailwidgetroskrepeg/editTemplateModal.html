@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<head>
+    <style type="text/css" media="screen">
+        .mymodal__row{
+            margin: 10px 0;
+        }
+        
+        .mymodal__textarea{
+            border: 1px black solid;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            resize: none;
+            paddding: 5px 5px 5px 5px;
+            overflow: scroll;
+        }
+        .mymodal__row._header{
+            font-size: 20px;
+        }
+        
+        .mymodal__row._balance{
+            font-size: 80%;
+            color: #999;
+        }
+
+        .mymodal__text_sender{
+
+        }
+
+        .mymodal__text{
+            color: black;
+            heigth: 400px;
+            margin: 10px 0;
+        }    
+
+        .textareaclass{
+            overflow: hidden;
+            width: 100%;
+            resize: none;
+        }
+    </style>
+
+</head>
+<body>
+    <form class="mymodal" action="" enctype="multipart/form-data" method="POST">
+        <div class="mymodal__row _header">
+            Редактор шаблонов
+        </div>
+
+        <div class="mymodal__row">
+            Название шаблона: <input type="text" name="nameTmpl" id="nameTmpl" placeholder="Название шаблона" value="">
+        </div>
+        
+        <div class="mymodal__row">
+            Email получателя: <input type="text" name="addressEmail" id="addressEmail" placeholder="Адресат" value="">
+        </div>
+
+        <div class="mymodal__row">
+            Тема письма: <input type="text" name="nameEmail" id="nameEmail" placeholder="Тема письма" value="">
+        </div>
+
+        <div>
+            Текст письма:
+        </div>   
+
+        <div class="mymodal__text">
+            <textarea class ="mymodal__textarea" name="ckeditorArea" id="ckeditorArea">
+            </textarea>
+        </div>
+
+        <div class="mymodal__row">
+            <button type="submit" class="button-input button-input_blue" id="button_ok">
+                <span class="button-input-inner">
+                    <span class="button-input-inner__text">
+                        Сохранить шаблон
+                    </span>
+                </span>
+            </button>
+        </div>
+
+        <div class="myoutputdata">
+        </div>
+
+
+    </form>
+
+    <script>
+
+        $(document).ready(function(){
+            CKEDITOR.replace('ckeditorArea');
+        });
+        
+    </script>
+
+</body>
